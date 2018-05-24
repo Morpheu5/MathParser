@@ -20,25 +20,40 @@ const lexer = moo.compile({
 %}
 @lexer lexer
 
-main -> _ AS _                      {% (d) => {
-                                                d[1].position = {x:0,y:0}
-                                                return d[1]
-                                              } %}
-
-P -> "(" _ AS _ ")"                 {% (d) => { return { type: 'Brackets', properties: { type: 'round' }, children: { argument: d[2] } } } %}
-   | %Fn "(" _ AS _ ")"             {% (d) => { return { type: 'Fn', properties: { name: d[0].text }, children: { argument: d[3] } } } %}
-#  | %Fn "^" NUM "(" _ AS _ ")"     {% (d) => { return d[0].value.toUpperCase() + "(" + d[5] + ")" + "**" + d[2] } %}
-   | VAR                            {% id %}
-   | NUM                            {% id %}
-
-E -> P _ "^" _ E                    {% (d) => { 
-                                                d[0].children['superscript'] = d[4]
-                                                return d[0]
-                                              } %}
-   | P                              {% id %}
-
-# Multiplication and division
 @{%
+const processMain = (d) => {
+    d[1].position = {x:0,y:0}
+    d[1].expression = { latex: "", python: "" }
+    return d[1]
+}
+
+const processBrackets = (d) => {
+    return { type: 'Brackets', properties: { type: 'round' }, children: { argument: d[2] } }
+}
+
+const processFunction = (d) => {
+    return { type: 'Fn', properties: { name: d[0].text }, children: { argument: d[3] } }
+}
+
+const processExponent = (d) => {
+    if (d[0].type === 'Fn') {
+        switch (d[0].properties.name) {
+            case 'ln':
+                d[0].properties['allowSubscript'] = false
+                return { type: 'Brackets', properties: { type: 'round' }, children: { argument: d[0], superscript: d[4] } }
+            case 'log':
+                d[0].properties['allowSubscript'] = true
+                return { type: 'Brackets', properties: { type: 'round' }, children: { argument: d[0], superscript: d[4] } }
+            default:
+                d[0].properties['innerSuperscript'] = d[4]
+                return d[0]
+        }
+    } else {
+        d[0].children['superscript'] = d[4]
+        return d[0]
+    }
+}
+
 const processMultiplication = (d) => {
     let r = d[0]
     while (r.children.right) {
@@ -50,6 +65,7 @@ const processMultiplication = (d) => {
     }
     return d[0]
 }
+
 const processFraction = (d) => {
     return {
         type: 'Fraction',
@@ -59,25 +75,47 @@ const processFraction = (d) => {
         }
     }
 }
+
+const processPlusMinus = (d) => {
+    d[0].children['right'] = { type: 'BinaryOperation', properties: { operation: d[2].text }, children: { right: d[4] } }
+    return d[0]
+}
+
+const processIdentifier = (d) => {
+    return { type: 'Symbol', properties: { letter: d[0].text }, children: {} }
+}
+
+const processNumber = (d) => {
+    return { type: 'Num', properties: { significand: d[0].text }, children: {} }
+}
 %}
+
+### Behold, the Grammar!
+
+main -> _ AS _                      {% processMain %}
+
+P -> "(" _ AS _ ")"                 {% processBrackets %}
+   | %Fn "(" _ AS _ ")"             {% processFunction %}
+#  | %Fn "^" NUM "(" _ AS _ ")"     {% (d) => { return d[0].value.toUpperCase() + "(" + d[5] + ")" + "**" + d[2] } %}
+   | VAR                            {% id %}
+   | NUM                            {% id %}
+
+E -> P _ "^" _ E                    {% processExponent %}
+   | P                              {% id %}
+
+# Multiplication and division
 MD -> MD _ "*" _ E                  {% processMultiplication %}
     # Do we really need to equate ' ' to '*'? Consider that sin^2 (x) -> sin**2*x vs syntax error.
     | MD _ " " _ E                  {% processMultiplication %}
     | MD _ "/" _ E                  {% processFraction %}
     | E                             {% id %}
 
-AS -> AS _ "+" _ MD                 {% (d) => {
-                                                d[0].children['right'] = { type: 'BinaryOperation', properties: { operation: d[2].text }, children: { right: d[4] } }
-                                                return d[0]
-                                              } %}
-    | AS _ "-" _ MD                 {% (d) => {
-                                                d[0].children['right'] = { type: 'BinaryOperation', properties: { operation: d[2].text }, children: { right: d[4] } }
-                                                return d[0]
-                                              } %}
+AS -> AS _ "+" _ MD                 {% processPlusMinus %}
+    | AS _ "-" _ MD                 {% processPlusMinus %}
     | MD                            {% id %}
 
-VAR -> %Id                          {% (d) => { return { type: 'Symbol', properties: { letter: d[0].text }, children: {} } } %}
+VAR -> %Id                          {% processIdentifier %}
 
-NUM -> %Int                         {% (d) => { return { type: 'Num', properties: { significand: d[0].text }, children: {} } } %}
+NUM -> %Int                         {% processNumber %}
 
 _ -> [\s]:*
