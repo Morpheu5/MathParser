@@ -2,6 +2,8 @@
 const greekLetterMap = { "alpha": "α", "beta": "β", "gamma": "γ", "delta": "δ", "epsilon": "ε", "varepsilon": "ε", "zeta": "ζ", "eta": "η", "theta": "θ", "iota": "ι", "kappa": "κ", "lambda": "λ", "mu": "μ", "nu": "ν", "xi": "ξ", "omicron": "ο", "pi": "π", "rho": "ρ", "sigma": "σ", "tau": "τ", "upsilon": "υ", "phi": "ϕ", "chi": "χ", "psi": "ψ", "omega": "ω", "Gamma": "Γ", "Delta": "Δ", "Theta": "Θ", "Lambda": "Λ", "Xi": "Ξ", "Pi": "Π", "Sigma": "Σ", "Upsilon": "Υ", "Phi": "Φ", "Psi": "Ψ", "Omega": "Ω" }
 const moo = require("moo");
 const lexer = moo.compile({
+    Int: /[0-9]+/,
+    Id: { match: /[a-zA-Z]+(?:_[a-zA-Z0-9]+)?/, keywords: {
 	Fn: ['cos', 'sin', 'tan',
          'cosec', 'sec', 'cot',
          'arccos', 'arcsin', 'arctan',
@@ -9,7 +11,8 @@ const lexer = moo.compile({
          'cosh', 'sinh', 'tanh', 'cosech', 'sech', 'coth',
          'arccosh', 'arcsinh', 'arctanh', 'arccosech', 'arcsech', 'arccoth',
          'log', 'ln',
-         ],
+         ]}
+    },
     c: /./,
 })
 %}
@@ -37,11 +40,8 @@ AS -> AS _ "+" _ MD                 {% (d) => { return d[0] + "+" + d[4] } %}
     | AS _ "-" _ MD                 {% (d) => { return d[0] + "-" + d[4] } %}
     | MD                            {% id %}
 
-VAR -> [a-zA-Z]:+                   {% (d) => { return  greekLetterMap[d[0].join("")] || d[0].join("") } %}
-     | [a-zA-Z]:+ U [a-zA-Z0-9]:+   {% (d) => { return (greekLetterMap[d[0].join("")] || d[0].join("")) + "_" + d[2].join("") } %}
+VAR -> %Id                          {% (d) => { return d[0].text } %}
 
-NUM -> [0-9]:+                      {% id %}
+NUM -> %Int                         {% (d) => { return d[0].text } %}
 
 _ -> [\s]:*
-
-U -> "_"
