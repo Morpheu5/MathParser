@@ -1,4 +1,5 @@
 @{%
+const _ = require("lodash")
 const greekLetterMap = { "alpha": "α", "beta": "β", "gamma": "γ", "delta": "δ", "epsilon": "ε", "varepsilon": "ε", "zeta": "ζ", "eta": "η", "theta": "θ", "iota": "ι", "kappa": "κ", "lambda": "λ", "mu": "μ", "nu": "ν", "xi": "ξ", "omicron": "ο", "pi": "π", "rho": "ρ", "sigma": "σ", "tau": "τ", "upsilon": "υ", "phi": "ϕ", "chi": "χ", "psi": "ψ", "omega": "ω", "Gamma": "Γ", "Delta": "Δ", "Theta": "Θ", "Lambda": "Λ", "Xi": "Ξ", "Pi": "Π", "Sigma": "Σ", "Upsilon": "Υ", "Phi": "Φ", "Psi": "Ψ", "Omega": "Ω" }
 const moo = require("moo");
 const lexer = moo.compile({
@@ -44,7 +45,7 @@ const processMultiplication = (d) => {
         r = r.children.right
     }
     // This is a terrifying hack.
-    if (r.type !== d[4].type && r.properties !== d[4].properties) {
+    if (r.type !== d[4].type && !_.isEqual(r.properties, d[4].properties)) {
         r.children['right'] = d[4]
     }
     return d[0]
