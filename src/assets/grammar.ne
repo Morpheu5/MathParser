@@ -38,6 +38,12 @@ const processFunction = (d) => {
     return { type: 'Fn', properties: { name: d[0].text }, children: { argument: arg } }
 }
 
+const processSpecialTrigFunction = (d) => {
+    let arg = _.cloneDeep(d[5])
+    let exp = _.cloneDeep(d[2])
+    return { type: 'Fn', properties: { name: d[0].text }, children: { innerSuperscript: exp, argument: arg } }
+}
+
 const processExponent = (d) => {
     let f = _.cloneDeep(d[0])
     let e = _.cloneDeep(d[4])
@@ -103,7 +109,7 @@ main -> _ AS _                      {% processMain %}
 
 P -> "(" _ AS _ ")"                 {% processBrackets %}
    | %Fn "(" _ AS _ ")"             {% processFunction %}
-#  | %Fn "^" NUM "(" _ AS _ ")"     {% (d) => { return d[0].value.toUpperCase() + "(" + d[5] + ")" + "**" + d[2] } %}
+   | %Fn "^" NUM "(" _ AS _ ")"     {% processSpecialTrigFunction %}
    | VAR                            {% id %}
    | NUM                            {% id %}
 
