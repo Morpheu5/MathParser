@@ -20,7 +20,7 @@ Some of the expressions that this can parse right now are
 
 Other features:
 
-- [ ] Greek letters to be converted to their Unicode counterparts
+- [x] Greek letters to be converted to their Unicode counterparts
 - [ ] radicals
 - [ ] (in)equalities
 - [ ] differentials and derivatives

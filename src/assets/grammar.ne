@@ -95,7 +95,27 @@ const processPlusMinus = (d) => {
 }
 
 const processIdentifier = (d) => {
-    return { type: 'Symbol', properties: { letter: d[0].text }, children: {} }
+    let ks = _.keys(greekLetterMap)
+    let rx = new RegExp(ks.join('|'), 'g')
+    let s = d[0].text.replace(rx, (v) => greekLetterMap[v] || v)
+    let parts = s.split('_')
+    if (parts.length == 1) {
+        return { type: 'Symbol', properties: { letter: greekLetterMap[parts[0]] || parts[0] }, children: {} }
+    } else {
+        console.log(parts[1])
+        let symbols = _.map(parts[1].split(''), (letter) => {
+            if (/[0-9]/.test(letter)) {
+                return processNumber( [ {text:letter} ] )
+            } else {
+                return processIdentifier( [ {text:letter} ] )
+            }
+        })
+        let chain = _.reduceRight(symbols, (a, c) => {
+            c.children['right'] = a
+            return c
+        } )
+        return { type: 'Symbol', properties: { letter: greekLetterMap[parts[0]] || parts[0] }, children: { right: chain } }
+    }
 }
 
 const processNumber = (d) => {
