@@ -1,5 +1,7 @@
 <template>
-    <div>
+    <div id="container">
+        <h1>Symbolic math parser for <a href="https://isaacphysics.org">Isaac Physics</a></h1>
+        <p>Type some maths, check that the tree gets generated correctly.</p>
         <input v-model="mathInput" @keyup="doTheThing" placeholder="Your math goes here" name="mathstring" />
 
         <pre><strong>Input</strong>:<br/>       {{mathInput}}</pre>
@@ -36,10 +38,20 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-input {
+#container {
     width: 80%;
+    margin: 0 auto;
+}
+
+input {
+    width: 97%;
+    margin: 0;
     line-height: 1em;
     font-size: 2em;
     padding: 0.5em;
+}
+
+pre {
+    font-size: 1.2em;
 }
 </style>

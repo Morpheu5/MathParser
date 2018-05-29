@@ -25,7 +25,7 @@ const lexer = moo.compile({
 @{%
 const processMain = (d) => {
     let main = _.cloneDeep(d[1])
-    main.position = {x:0,y:0}
+    main.position = {x:window.innerWidth/4,y:window.innerHeight/3}
     main.expression = { latex: "", python: "" }
     return main
 }
