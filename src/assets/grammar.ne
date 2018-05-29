@@ -22,63 +22,70 @@ const lexer = moo.compile({
 
 @{%
 const processMain = (d) => {
-    d[1].position = {x:0,y:0}
-    d[1].expression = { latex: "", python: "" }
-    return d[1]
+    let main = _.cloneDeep(d[1])
+    main.position = {x:0,y:0}
+    main.expression = { latex: "", python: "" }
+    return main
 }
 
 const processBrackets = (d) => {
-    return { type: 'Brackets', properties: { type: 'round' }, children: { argument: d[2] } }
+    let arg = _.cloneDeep(d[2])
+    return { type: 'Brackets', properties: { type: 'round' }, children: { argument: arg } }
 }
 
 const processFunction = (d) => {
-    return { type: 'Fn', properties: { name: d[0].text }, children: { argument: d[3] } }
+    let arg = _.cloneDeep(d[3])
+    return { type: 'Fn', properties: { name: d[0].text }, children: { argument: arg } }
 }
 
 const processExponent = (d) => {
-    if (d[0].type === 'Fn') {
-        switch (d[0].properties.name) {
+    let f = _.cloneDeep(d[0])
+    let e = _.cloneDeep(d[4])
+
+    if (f.type === 'Fn') {
+        switch (f.properties.name) {
             case 'ln':
-                d[0].properties['allowSubscript'] = false
-                return { type: 'Brackets', properties: { type: 'round' }, children: { argument: d[0], superscript: d[4] } }
+                f.properties['allowSubscript'] = false
+                return { type: 'Brackets', properties: { type: 'round' }, children: { argument: f, superscript: e } }
             case 'log':
-                d[0].properties['allowSubscript'] = true
-                return { type: 'Brackets', properties: { type: 'round' }, children: { argument: d[0], superscript: d[4] } }
+                f.properties['allowSubscript'] = true
+                return { type: 'Brackets', properties: { type: 'round' }, children: { argument: f, superscript: e } }
             default:
-                d[0].properties['innerSuperscript'] = d[4]
-                return d[0]
+                f.properties['innerSuperscript'] = e
+                return f
         }
     } else {
-        d[0].children['superscript'] = d[4]
-        return d[0]
+        f.children['superscript'] = e
+        return f
     }
 }
 
 const processMultiplication = (d) => {
-    let r = d[0]
+    let lhs = _.cloneDeep(d[0])
+    let rhs = _.cloneDeep(d[4])
+    let r = lhs
     while (r.children.right) {
         r = r.children.right
     }
-    // This is a terrifying hack.
-    if (r.type !== d[4].type && !_.isEqual(r.properties, d[4].properties)) {
-        r.children['right'] = d[4]
-    }
-    return d[0]
+    r.children['right'] = rhs
+    return lhs
 }
 
 const processFraction = (d) => {
     return {
         type: 'Fraction',
         children: {
-            numerator: d[0],
-            denominator: d[4]
+            numerator: _.cloneDeep(d[0]),
+            denominator: _.cloneDeep(d[4])
         }
     }
 }
 
 const processPlusMinus = (d) => {
-    d[0].children['right'] = { type: 'BinaryOperation', properties: { operation: d[2].text }, children: { right: d[4] } }
-    return d[0]
+    let lhs = _.cloneDeep(d[0])
+    let rhs = _.cloneDeep(d[4])
+    lhs.children['right'] = { type: 'BinaryOperation', properties: { operation: d[2].text }, children: { right: rhs } }
+    return lhs
 }
 
 const processIdentifier = (d) => {
