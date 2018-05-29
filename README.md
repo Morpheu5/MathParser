@@ -1,10 +1,10 @@
 # MathParser
 
-A parser of math formulas to allow text entry on https://isaacphysics.org/equality
+A parser of math formulas to allow text entry on [Isaac Physics' symbolic editor](https://isaacphysics.org/equality)
 
 This is no more than a demo application. This code will eventually make its way into Isaac Physics.
 
-```
+```bash
 npm install
 npm run serve
 ```
