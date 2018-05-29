@@ -13,6 +13,7 @@ const lexer = moo.compile({
          'arccosh', 'arcsinh', 'arctanh', 'arccosech', 'arcsech', 'arccoth',
          'log', 'ln',
          ],
+    Radix: ['sqrt']
          },
     },
     c: /./,
@@ -42,6 +43,11 @@ const processSpecialTrigFunction = (d) => {
     let arg = _.cloneDeep(d[5])
     let exp = _.cloneDeep(d[2])
     return { type: 'Fn', properties: { name: d[0].text }, children: { innerSuperscript: exp, argument: arg } }
+}
+
+const processRadix = (d) => {
+    let arg = _.cloneDeep(d[3])
+    return { type: 'Radix', children: { argument: arg } }
 }
 
 const processExponent = (d) => {
@@ -130,6 +136,7 @@ main -> _ AS _                      {% processMain %}
 P -> "(" _ AS _ ")"                 {% processBrackets %}
    | %Fn "(" _ AS _ ")"             {% processFunction %}
    | %Fn "^" NUM "(" _ AS _ ")"     {% processSpecialTrigFunction %}
+   | %Radix "(" _ AS _ ")"          {% processRadix %}
    | VAR                            {% id %}
    | NUM                            {% id %}
 
