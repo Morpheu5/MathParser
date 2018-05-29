@@ -27,10 +27,8 @@ export default {
             let parser = new Parser(compiledGrammar)
             try {
                 this.output = parser.feed(this.mathInput).results
-                // debugger;
             } catch (error) {
-                this.output = ''
-                console.log("Error: ", error)
+                this.output = `Some error occurred: ${error}`
             }
         }
     }
