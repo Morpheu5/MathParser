@@ -16,7 +16,7 @@ const lexer = moo.compile({
     Radix: ['sqrt'],
          },
     },
-    Rel: ['=', '<', '<=', '>', '>='],
+    Rel: ['=', '==', '<', '<=', '>', '>='],
     c: /./,
 })
 %}
@@ -33,7 +33,8 @@ const processMain = (d) => {
 const processRelation = (d) => {
     let left = _.cloneDeep(d[1])
     let right = _.cloneDeep(d[5])
-    let relation = { type: 'Relation', properties: { relation: d[3].text }, children: { right } }
+    let relText = d[3].text === '==' ? '=' : d[3].text
+    let relation = { type: 'Relation', properties: { relation: relText }, children: { right } }
     left.children['right'] = relation
     return { ...left, position: {x:0, y:0}, expression: { latex: "", python: "" } }
 }
@@ -109,28 +110,34 @@ const processPlusMinus = (d) => {
     return lhs
 }
 
+const _processChainOfLetters = (s) => {
+    let symbols = _.map(s.split(''), (letter) => {
+        if (/[0-9]/.test(letter)) {
+            return processNumber( [ {text:letter} ] )
+        } else {
+            return { type: 'Symbol', properties: { letter }, children: {} }
+        }
+    })
+    let chain = _.reduceRight(symbols, (a, c) => {
+        c.children['right'] = a
+        return c
+    })
+    return chain
+}
+
 const processIdentifier = (d) => {
-    let ks = _.keys(greekLetterMap)
-    let rx = new RegExp(ks.join('|'), 'g')
-    let s = d[0].text.replace(rx, (v) => greekLetterMap[v] || v)
-    let parts = s.split('_')
-    if (parts.length == 1) {
-        return { type: 'Symbol', properties: { letter: greekLetterMap[parts[0]] || parts[0] }, children: {} }
-    } else {
-        console.log(parts[1])
-        let symbols = _.map(parts[1].split(''), (letter) => {
-            if (/[0-9]/.test(letter)) {
-                return processNumber( [ {text:letter} ] )
-            } else {
-                return processIdentifier( [ {text:letter} ] )
-            }
-        })
-        let chain = _.reduceRight(symbols, (a, c) => {
-            c.children['right'] = a
-            return c
-        } )
-        return { type: 'Symbol', properties: { letter: greekLetterMap[parts[0]] || parts[0] }, children: { right: chain } }
+    let rx = new RegExp(_.keys(greekLetterMap).join('|'), 'g')
+    let parts = d[0].text.replace(rx, (v) => greekLetterMap[v] || v).split('_')
+    let topChain = _processChainOfLetters(parts[0])
+    if (parts.length > 1) {
+        let chain = _processChainOfLetters(parts[1])
+        let r = topChain
+        while (r.children.right) {
+            r = r.children.right
+        }
+        r.children['subscript'] = chain
     }
+    return topChain
 }
 
 const processNumber = (d) => {
