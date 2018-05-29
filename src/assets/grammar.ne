@@ -13,9 +13,10 @@ const lexer = moo.compile({
          'arccosh', 'arcsinh', 'arctanh', 'arccosech', 'arcsech', 'arccoth',
          'log', 'ln',
          ],
-    Radix: ['sqrt']
+    Radix: ['sqrt'],
          },
     },
+    Rel: ['=', '<', '<=', '>', '>='],
     c: /./,
 })
 %}
@@ -27,6 +28,14 @@ const processMain = (d) => {
     main.position = {x:0,y:0}
     main.expression = { latex: "", python: "" }
     return main
+}
+
+const processRelation = (d) => {
+    let left = _.cloneDeep(d[1])
+    let right = _.cloneDeep(d[5])
+    let relation = { type: 'Relation', properties: { relation: d[3].text }, children: { right } }
+    left.children['right'] = relation
+    return { ...left, position: {x:0, y:0}, expression: { latex: "", python: "" } }
 }
 
 const processBrackets = (d) => {
@@ -132,6 +141,7 @@ const processNumber = (d) => {
 ### Behold, the Grammar!
 
 main -> _ AS _                      {% processMain %}
+      | _ AS _ %Rel _ AS _          {% processRelation %}
 
 P -> "(" _ AS _ ")"                 {% processBrackets %}
    | %Fn "(" _ AS _ ")"             {% processFunction %}

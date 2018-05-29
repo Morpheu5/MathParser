@@ -21,8 +21,8 @@ Some of the expressions that this can parse right now are
 Other features:
 
 - [x] Greek letters to be converted to their Unicode counterparts
-- [ ] radicals
-- [ ] (in)equalities
+- [x] radicals
+- [x] (in)equalities
 - [ ] differentials and derivatives
 - [ ] absolute values, maybe?
 
