@@ -23,9 +23,24 @@ const lexer = moo.compile({
 @lexer lexer
 
 @{%
+let _window = null
+try {
+    _window = window
+} catch (error) {
+    _window = { innerWidth: 800, innerHeight: 600 }
+}
+
+const _findRightmost = (node) => {
+    let n = node
+    while (n.children.right) {
+        n = n.children.right
+    }
+    return n
+}
+
 const processMain = (d) => {
     let main = _.cloneDeep(d[1])
-    main.position = {x:window.innerWidth/4,y:window.innerHeight/3}
+    main.position = { x: _window.innerWidth/4, y: _window.innerHeight/3 }
     main.expression = { latex: "", python: "" }
     return main
 }
@@ -35,8 +50,9 @@ const processRelation = (d) => {
     let right = _.cloneDeep(d[5])
     let relText = d[3].text === '==' ? '=' : d[3].text
     let relation = { type: 'Relation', properties: { relation: relText }, children: { right } }
-    left.children['right'] = relation
-    return { ...left, position: {x:0, y:0}, expression: { latex: "", python: "" } }
+    let r = _findRightmost(left)
+    r.children['right'] = relation
+    return { ...left, position: { x: _window.innerWidth/4, y: _window.innerHeight/3 }, expression: { latex: "", python: "" } }
 }
 
 const processBrackets = (d) => {
@@ -85,10 +101,7 @@ const processExponent = (d) => {
 const processMultiplication = (d) => {
     let lhs = _.cloneDeep(d[0])
     let rhs = _.cloneDeep(d[4])
-    let r = lhs
-    while (r.children.right) {
-        r = r.children.right
-    }
+    let r = _findRightmost(lhs)
     r.children['right'] = rhs
     return lhs
 }
@@ -131,10 +144,7 @@ const processIdentifier = (d) => {
     let topChain = _processChainOfLetters(parts[0])
     if (parts.length > 1) {
         let chain = _processChainOfLetters(parts[1])
-        let r = topChain
-        while (r.children.right) {
-            r = r.children.right
-        }
+        let r = _findRightmost(topChain)
         r.children['subscript'] = chain
     }
     return topChain
