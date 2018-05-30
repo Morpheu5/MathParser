@@ -1,5 +1,6 @@
 .DS_Store
 node_modules
+dist
 
 # local env files
 .env.local
@@ -74,4 +75,3 @@ typings/
 
 # next.js build output
 .next
-dist/
