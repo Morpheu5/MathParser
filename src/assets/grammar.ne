@@ -119,7 +119,8 @@ const processFraction = (d) => {
 const processPlusMinus = (d) => {
     let lhs = _.cloneDeep(d[0])
     let rhs = _.cloneDeep(d[4])
-    lhs.children['right'] = { type: 'BinaryOperation', properties: { operation: d[2].text }, children: { right: rhs } }
+    let r = _findRightmost(lhs)
+    r.children['right'] = { type: 'BinaryOperation', properties: { operation: d[2].text }, children: { right: rhs } }
     return lhs
 }
 
