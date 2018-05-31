@@ -46,13 +46,13 @@ const processMain = (d) => {
 }
 
 const processRelation = (d) => {
-    let left = _.cloneDeep(d[1])
-    let right = _.cloneDeep(d[5])
+    let lhs = _.cloneDeep(d[1])
+    let rhs = _.cloneDeep(d[5])
     let relText = d[3].text === '==' ? '=' : d[3].text
-    let relation = { type: 'Relation', properties: { relation: relText }, children: { right } }
-    let r = _findRightmost(left)
+    let relation = { type: 'Relation', properties: { relation: relText }, children: { rhs } }
+    let r = _findRightmost(lhs)
     r.children['right'] = relation
-    return { ...left, position: { x: _window.innerWidth/4, y: _window.innerHeight/3 }, expression: { latex: "", python: "" } }
+    return { ...lhs, position: { x: _window.innerWidth/4, y: _window.innerHeight/3 }, expression: { latex: "", python: "" } }
 }
 
 const processBrackets = (d) => {
@@ -89,8 +89,12 @@ const processExponent = (d) => {
                 f.properties['allowSubscript'] = true
                 return { type: 'Brackets', properties: { type: 'round' }, children: { argument: f, superscript: e } }
             default:
-                f.properties['innerSuperscript'] = e
-                return f
+                if (f.children['innerSuperscript']) {
+                    return { type: 'Brackets', properties: { type: 'round' }, children: { argument: f, superscript: e } }
+                } else {
+                    f.children['innerSuperscript'] = e
+                    return f
+                }
         }
     } else {
         f.children['superscript'] = e
