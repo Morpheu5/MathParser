@@ -10,12 +10,20 @@ const lexer = moo.compile({
          'arccosec', 'arcsec', 'arccot',
          'cosh', 'sinh', 'tanh', 'cosech', 'sech', 'coth',
          'arccosh', 'arcsinh', 'arctanh', 'arccosech', 'arcsech', 'arccoth',
-         'log', 'ln',
+         'ln',
          ],
+    Log: ['log'],
     Radix: ['sqrt'],
          },
     },
+    LogBase: /,\s*[0-9]+/,
     Rel: ['=', '==', '<', '<=', '>', '>='],
+    PlusMinus: ['+', '-'],
+    Mul: ['*', '×'],
+    Div: ['/'],
+    Lparen: '(',
+    Rparen: ')',
+    Pow: '^',
     c: /./,
 })
 
@@ -67,6 +75,18 @@ const processSpecialTrigFunction = (d) => {
     return { type: 'Fn', properties: { name: d[0].text, allowSubscript: false, innerSuperscript: true }, children: { superscript: exp, argument: arg } }
 }
 
+const processLog = (arg, base = null) => {
+    let log = { type: 'Fn', properties: { name: 'log', allowSubscript: true, innerSuperscript: false }, children: { argument: arg } }
+    if (null !== base) {
+        let parsedBase = base.text.replace(/[^0-9]/g, '')
+        let baseNumber = parseInt(parsedBase)
+        if (_.isNumber(baseNumber) && baseNumber !== 10) {
+            log.children['subscript'] = { type: 'Num', properties: { significand: parsedBase }, children: {} }
+        }
+    }
+    return log
+}
+
 const processRadix = (d) => {
     let arg = _.cloneDeep(d[3])
     return { type: 'Radix', children: { argument: arg } }
@@ -83,7 +103,7 @@ const processExponent = (d) => {
             case 'log':
                 return { type: 'Brackets', properties: { type: 'round' }, children: { argument: f, superscript: e } }
             default:
-                f.properties['superscript'] = e
+                f.children['superscript'] = e
                 return f
         }
     } else {
@@ -154,32 +174,33 @@ const processNumber = (d) => {
 
 ### Behold, the Grammar!
 
-main -> _ AS _                      {% processMain %}
-      | _ AS _ %Rel _ AS _          {% processRelation %}
+main -> _ AS _                                       {% processMain %}
+      | _ AS _ %Rel _ AS _                           {% processRelation %}
 
-P -> "(" _ AS _ ")"                 {% processBrackets %}
-   | %Fn "(" _ AS _ ")"             {% processFunction %}
-   | %Fn "^" NUM "(" _ AS _ ")"     {% processSpecialTrigFunction %}
-   | %Radix "(" _ AS _ ")"          {% processRadix %}
-   | VAR                            {% id %}
-   | NUM                            {% id %}
+P ->               %Lparen _ AS _          %Rparen   {% processBrackets %}
+   | %Fn           %Lparen _ AS _          %Rparen   {% processFunction %}
+   | %Fn %Pow NUM  %Lparen _ AS _          %Rparen   {% processSpecialTrigFunction %}
+   | %Log          %Lparen _ AS _          %Rparen   {% (d) => { return processLog(d[3]) } %}
+   | %Log          %Lparen _ AS _ %LogBase %Rparen   {% (d) => { return processLog(d[3], d[5]) } %}
+   | %Radix        %Lparen _ AS _          %Rparen   {% processRadix %}
+   | VAR                                             {% id %}
+   | NUM                                             {% id %}
 
-E -> P _ "^" _ E                    {% processExponent %}
-   | P                              {% id %}
+E -> P _ %Pow _ E                                    {% processExponent %}
+   | P                                               {% id %}
 
 # Multiplication and division
-MD -> MD _ "*" _ E                  {% processMultiplication %}
+MD -> MD _ %Mul _ E                                  {% processMultiplication %}
     # Do we really need to equate ' ' to '*'? Consider that sin^2 (x) -> sin**2*x vs syntax error.
-    | MD _ " " _ E                  {% processMultiplication %}
-    | MD _ "/" _ E                  {% processFraction %}
-    | E                             {% id %}
+    | MD _ " " _ E                                   {% processMultiplication %}
+    | MD _ %Div _ E                                  {% processFraction %}
+    | E                                              {% id %}
 
-AS -> AS _ "+" _ MD                 {% processPlusMinus %}
-    | AS _ "-" _ MD                 {% processPlusMinus %}
-    | MD                            {% id %}
+AS -> AS _ %PlusMinus _ MD                           {% processPlusMinus %}
+    | MD                                             {% id %}
 
-VAR -> %Id                          {% processIdentifier %}
+VAR -> %Id                                           {% processIdentifier %}
 
-NUM -> %Int                         {% processNumber %}
+NUM -> %Int                                          {% processNumber %}
 
 _ -> [\s]:*
