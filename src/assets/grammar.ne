@@ -1,5 +1,4 @@
 @{%
-const _ = require("lodash")
 const greekLetterMap = { "alpha": "α", "beta": "β", "gamma": "γ", "delta": "δ", "epsilon": "ε", "varepsilon": "ε", "zeta": "ζ", "eta": "η", "theta": "θ", "iota": "ι", "kappa": "κ", "lambda": "λ", "mu": "μ", "nu": "ν", "xi": "ξ", "omicron": "ο", "pi": "π", "rho": "ρ", "sigma": "σ", "tau": "τ", "upsilon": "υ", "phi": "ϕ", "chi": "χ", "psi": "ψ", "omega": "ω", "Gamma": "Γ", "Delta": "Δ", "Theta": "Θ", "Lambda": "Λ", "Xi": "Ξ", "Pi": "Π", "Sigma": "Σ", "Upsilon": "Υ", "Phi": "Φ", "Psi": "Ψ", "Omega": "Ω" }
 const moo = require("moo");
 const lexer = moo.compile({
@@ -19,10 +18,7 @@ const lexer = moo.compile({
     Rel: ['=', '==', '<', '<=', '>', '>='],
     c: /./,
 })
-%}
-@lexer lexer
 
-@{%
 let _window = null
 try {
     _window = window
@@ -46,13 +42,13 @@ const processMain = (d) => {
 }
 
 const processRelation = (d) => {
-    let left = _.cloneDeep(d[1])
-    let right = _.cloneDeep(d[5])
+    let lhs = _.cloneDeep(d[1])
+    let rhs = _.cloneDeep(d[5])
     let relText = d[3].text === '==' ? '=' : d[3].text
-    let relation = { type: 'Relation', properties: { relation: relText }, children: { right } }
-    let r = _findRightmost(left)
+    let relation = { type: 'Relation', properties: { relation: relText }, children: { rhs } }
+    let r = _findRightmost(lhs)
     r.children['right'] = relation
-    return { ...left, position: { x: _window.innerWidth/4, y: _window.innerHeight/3 }, expression: { latex: "", python: "" } }
+    return { ...lhs, position: { x: _window.innerWidth/4, y: _window.innerHeight/3 }, expression: { latex: "", python: "" } }
 }
 
 const processBrackets = (d) => {
@@ -117,7 +113,8 @@ const processFraction = (d) => {
 const processPlusMinus = (d) => {
     let lhs = _.cloneDeep(d[0])
     let rhs = _.cloneDeep(d[4])
-    lhs.children['right'] = { type: 'BinaryOperation', properties: { operation: d[2].text }, children: { right: rhs } }
+    let r = _findRightmost(lhs)
+    r.children['right'] = { type: 'BinaryOperation', properties: { operation: d[2].text }, children: { right: rhs } }
     return lhs
 }
 
@@ -152,6 +149,8 @@ const processNumber = (d) => {
     return { type: 'Num', properties: { significand: d[0].text }, children: {} }
 }
 %}
+
+@lexer lexer
 
 ### Behold, the Grammar!
 

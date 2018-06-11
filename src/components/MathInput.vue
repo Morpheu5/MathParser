@@ -11,6 +11,9 @@
 </template>
 
 <script>
+// eslint-disable-next-line
+import _ from 'lodash';
+
 import { Parser, Grammar } from 'nearley';
 import grammar from '../assets/grammar.ne';
 
