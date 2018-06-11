@@ -18,9 +18,9 @@ const lexer = moo.compile({
     },
     LogBase: /,\s*[0-9]+/,
     Rel: ['=', '==', '<', '<=', '>', '>='],
-    PlusMinus: ['+', '-'],
+    PlusMinus: ['+', '-', '±', '-', '-'], // The minus signs are not all the same
     Mul: ['*', '×'],
-    Div: ['/'],
+    Div: ['/', '÷'],
     Lparen: '(',
     Rparen: ')',
     Pow: '^',
