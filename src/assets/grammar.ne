@@ -62,13 +62,13 @@ const processBrackets = (d) => {
 
 const processFunction = (d) => {
     let arg = _.cloneDeep(d[3])
-    return { type: 'Fn', properties: { name: d[0].text }, children: { argument: arg } }
+    return { type: 'Fn', properties: { name: d[0].text, allowSubscript: d[0].text !== 'ln', innerSuperscript: false }, children: { argument: arg } }
 }
 
 const processSpecialTrigFunction = (d) => {
     let arg = _.cloneDeep(d[5])
     let exp = _.cloneDeep(d[2])
-    return { type: 'Fn', properties: { name: d[0].text }, children: { innerSuperscript: exp, argument: arg } }
+    return { type: 'Fn', properties: { name: d[0].text, allowSubscript: false, innerSuperscript: true }, children: { superscript: exp, argument: arg } }
 }
 
 const processRadix = (d) => {
@@ -83,13 +83,11 @@ const processExponent = (d) => {
     if (f.type === 'Fn') {
         switch (f.properties.name) {
             case 'ln':
-                f.properties['allowSubscript'] = false
                 return { type: 'Brackets', properties: { type: 'round' }, children: { argument: f, superscript: e } }
             case 'log':
-                f.properties['allowSubscript'] = true
                 return { type: 'Brackets', properties: { type: 'round' }, children: { argument: f, superscript: e } }
             default:
-                f.properties['innerSuperscript'] = e
+                f.properties['superscript'] = e
                 return f
         }
     } else {
