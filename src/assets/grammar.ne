@@ -3,6 +3,7 @@ const greekLetterMap = { "alpha": "α", "beta": "β", "gamma": "γ", "delta": "�
 const moo = require("moo");
 const lexer = moo.compile({
     Int: /[0-9]+/,
+    IdMod: /[a-zA-Z]+_(?:prime)/,
     Id: { match: /[a-zA-Z]+(?:_[a-zA-Z0-9]+)?/, keywords: {
 	Fn: ['cos', 'sin', 'tan',
          'cosec', 'sec', 'cot',
@@ -165,6 +166,15 @@ const processIdentifier = (d) => {
     return topChain
 }
 
+const processIdentifierModified = (d) => {
+    let rx = new RegExp(_.keys(greekLetterMap).join('|'), 'g')
+    let parts = d[0].text.split('_')
+    let topChain = _processChainOfLetters(parts[0].replace(rx, (v) => greekLetterMap[v] || v))
+    let r = _findRightmost(topChain)
+    r.properties['modifier'] = parts[1]
+    return topChain
+}
+
 const processNumber = (d) => {
     return { type: 'Num', properties: { significand: d[0].text }, children: {} }
 }
@@ -200,6 +210,7 @@ AS -> AS _ %PlusMinus _ MD                           {% processPlusMinus %}
     | MD                                             {% id %}
 
 VAR -> %Id                                           {% processIdentifier %}
+     | %IdMod                                        {% processIdentifierModified %}
 
 NUM -> %Int                                          {% processNumber %}
 
