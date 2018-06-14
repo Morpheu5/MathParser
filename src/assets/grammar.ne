@@ -139,6 +139,10 @@ const processPlusMinus = (d) => {
     return lhs
 }
 
+const processUnaryPlusMinus = (d) => {
+    return { type: 'BinaryOperaton', properties: { operation: d[0].text }, children: { right: d[2] } }
+}
+
 const _processChainOfLetters = (s) => {
     let symbols = _.map(s.split(''), (letter) => {
         if (/[0-9]/.test(letter)) {
@@ -207,6 +211,7 @@ MD -> MD _ %Mul _ E                                  {% processMultiplication %}
     | E                                              {% id %}
 
 AS -> AS _ %PlusMinus _ MD                           {% processPlusMinus %}
+    | %PlusMinus _ MD                                {% processUnaryPlusMinus %}
     | MD                                             {% id %}
 
 VAR -> %Id                                           {% processIdentifier %}
