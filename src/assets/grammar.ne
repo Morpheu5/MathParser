@@ -140,7 +140,7 @@ const processPlusMinus = (d) => {
 }
 
 const processUnaryPlusMinus = (d) => {
-    return { type: 'BinaryOperaton', properties: { operation: d[0].text }, children: { right: d[2] } }
+    return { type: 'BinaryOperation', properties: { operation: d[0].text }, children: { right: d[2] } }
 }
 
 const _processChainOfLetters = (s) => {
