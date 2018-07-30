@@ -15,16 +15,17 @@ const lexer = moo.compile({
          ],
     Log: ['log'],
     Radix: ['sqrt'],
+    Derivative: ['diff'],
          },
     },
     LogBase: /,\s*[0-9]+/,
     Rel: ['=', '==', '<', '<=', '>', '>='],
     PlusMinus: ['+', '-', '±', '-', '-'], // The minus signs are not all the same
+    Pow: ['**', '^'],
     Mul: ['*', '×'],
     Div: ['/', '÷'],
     Lparen: '(',
     Rparen: ')',
-    Pow: '^',
     c: /./,
 })
 
