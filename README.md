@@ -17,13 +17,17 @@ Some of the expressions that this can parse right now are
 - `sin(x)`
 - `sin(x)^2`
 - `e^(i*omega + phi)`
+- `diff(x^2, x)`
+- `diff(x^3 * y^2, x, x, y)`
+- `diff(x^3 * y^2, x, 2, y)` (equivalent to the one above)
 
 Other features:
 
 - [x] Greek letters to be converted to their Unicode counterparts
 - [x] radicals
 - [x] (in)equalities
-- [ ] differentials and derivatives
+- [x] derivatives
+- [ ] differentials, maybe?
 - [ ] absolute values, maybe?
 
 For now, enjoy 🙂
