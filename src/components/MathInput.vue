@@ -22,7 +22,7 @@ const compiledGrammar = Grammar.fromCompiled(grammar)
 export default {
     data() {
         return {
-            mathInput: 'diff(x^3 * y^2, x, 2, y)',
+            mathInput: '2x',
             parser: {},
             output: ''
         }
