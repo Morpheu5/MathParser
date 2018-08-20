@@ -6,7 +6,7 @@
 
         <pre><strong>Input</strong>:<br/>       {{mathInput}}</pre>
         <pre>---<br/>{{ parser.lexer }}</pre>
-        <pre><strong>Output</strong>:<br/>{{ output }}</pre>
+        <pre><strong>Output size</strong>: {{output.length}}<br/>{{ output }}</pre>
     </div>
 </template>
 
@@ -22,7 +22,7 @@ const compiledGrammar = Grammar.fromCompiled(grammar)
 export default {
     data() {
         return {
-            mathInput: '2x',
+            mathInput: '',
             parser: {},
             output: ''
         }
@@ -31,7 +31,7 @@ export default {
         doTheThing() {
             let parser = new Parser(compiledGrammar)
             try {
-                this.output = parser.feed(this.mathInput).results
+                this.output = _.uniqWith(parser.feed(this.mathInput).results, _.isEqual)
             } catch (error) {
                 this.output = `Some error occurred: ${error}`
             }
