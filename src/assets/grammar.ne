@@ -100,9 +100,11 @@ const processExponent = (d) => {
     let f = _.cloneDeep(d[0])
     let e = _.cloneDeep(d[4])
     let r = _findRightmost(f)
-
-    f.children.right = _.cloneDeep(e.children.right)
-    e.children = _.omit(e.children, 'right')
+    let eRight = _.cloneDeep(e.children.right)
+    if (eRight) {
+        f.children.right = _.cloneDeep(e.children.right)
+        e.children = _.omit(e.children, 'right')
+    }
 
     if (['Fn', 'Log', 'TrigFn'].includes(f.type)) {
         switch (f.properties.name) {
@@ -131,14 +133,17 @@ const processMultiplication = (d) => {
 const processFraction = (d) => {
     const denominatorRight = _.cloneDeep(d[4].children.right)
     d[4].children = _.omit(d[4].children, 'right')
-    return {
+    let fraction = {
         type: 'Fraction',
         children: {
             numerator: _.cloneDeep(d[0]),
             denominator: _.cloneDeep(d[4]),
-            right: denominatorRight,
         }
     }
+    if (denominatorRight) {
+        fraction.children.right = denominatorRight
+    }
+    return fraction
 }
 
 const processPlusMinus = (d) => {
@@ -169,7 +174,7 @@ const _processChainOfLetters = (s) => {
 }
 
 const processIdentifier = (d) => {
-    greekLetterKeys = Object.keys(greekLetterMap);
+    const greekLetterKeys = Object.keys(greekLetterMap);
     let parts = d[0].text.split('_');
     if (greekLetterKeys.includes(parts[0])) {
         parts[0] = greekLetterMap[parts[0]]
@@ -187,7 +192,7 @@ const processIdentifier = (d) => {
 }
 
 const processIdentifierModified = (d) => {
-    greekLetterKeys = Object.keys(greekLetterMap);
+    const greekLetterKeys = Object.keys(greekLetterMap);
     let parts = d[0].text.split('_');
     if (greekLetterKeys.includes(parts[0])) {
         parts[0] = greekLetterMap[parts[0]]

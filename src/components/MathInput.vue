@@ -22,7 +22,7 @@ const compiledGrammar = Grammar.fromCompiled(grammar)
 export default {
     data() {
         return {
-            mathInput: 'e^abc d',
+            mathInput: '',
             parser: {},
             output: ''
         }
