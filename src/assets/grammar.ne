@@ -1,6 +1,6 @@
 @{%
 const greekLetterMap = { "alpha": "α", "beta": "β", "gamma": "γ", "delta": "δ", "epsilon": "ε", "varepsilon": "ε", "zeta": "ζ", "eta": "η", "theta": "θ", "iota": "ι", "kappa": "κ", "lambda": "λ", "mu": "μ", "nu": "ν", "xi": "ξ", "omicron": "ο", "pi": "π", "rho": "ρ", "sigma": "σ", "tau": "τ", "upsilon": "υ", "phi": "ϕ", "chi": "χ", "psi": "ψ", "omega": "ω", "Gamma": "Γ", "Delta": "Δ", "Theta": "Θ", "Lambda": "Λ", "Xi": "Ξ", "Pi": "Π", "Sigma": "Σ", "Upsilon": "Υ", "Phi": "Φ", "Psi": "Ψ", "Omega": "Ω" }
-const moo = require("moo");
+const moo = require("moo")
 const lexer = moo.compile({
     Int: /[0-9]+/,
     IdMod: /[a-zA-Z]+_(?:prime)/,
@@ -101,6 +101,9 @@ const processExponent = (d) => {
     let e = _.cloneDeep(d[4])
     let r = _findRightmost(f)
 
+    f.children.right = _.cloneDeep(e.children.right)
+    e.children = _.omit(e.children, 'right')
+
     if (['Fn', 'Log', 'TrigFn'].includes(f.type)) {
         switch (f.properties.name) {
             case 'ln':
@@ -126,11 +129,14 @@ const processMultiplication = (d) => {
 }
 
 const processFraction = (d) => {
+    const denominatorRight = _.cloneDeep(d[4].children.right)
+    d[4].children = _.omit(d[4].children, 'right')
     return {
         type: 'Fraction',
         children: {
             numerator: _.cloneDeep(d[0]),
-            denominator: _.cloneDeep(d[4])
+            denominator: _.cloneDeep(d[4]),
+            right: denominatorRight,
         }
     }
 }
@@ -163,10 +169,16 @@ const _processChainOfLetters = (s) => {
 }
 
 const processIdentifier = (d) => {
-    let rx = new RegExp(_.keys(greekLetterMap).join('|'), 'g')
-    let parts = d[0].text.replace(rx, (v) => greekLetterMap[v] || v).split('_')
+    greekLetterKeys = Object.keys(greekLetterMap);
+    let parts = d[0].text.split('_');
+    if (greekLetterKeys.includes(parts[0])) {
+        parts[0] = greekLetterMap[parts[0]]
+    }
     let topChain = _processChainOfLetters(parts[0])
     if (parts.length > 1) {
+        if (greekLetterKeys.includes(parts[1])) {
+            parts[1] = greekLetterMap[parts[1]]
+        }
         let chain = _processChainOfLetters(parts[1])
         let r = _findRightmost(topChain)
         r.children['subscript'] = chain
@@ -175,9 +187,12 @@ const processIdentifier = (d) => {
 }
 
 const processIdentifierModified = (d) => {
-    let rx = new RegExp(_.keys(greekLetterMap).join('|'), 'g')
-    let parts = d[0].text.split('_')
-    let topChain = _processChainOfLetters(parts[0].replace(rx, (v) => greekLetterMap[v] || v))
+    greekLetterKeys = Object.keys(greekLetterMap);
+    let parts = d[0].text.split('_');
+    if (greekLetterKeys.includes(parts[0])) {
+        parts[0] = greekLetterMap[parts[0]]
+    }
+    let topChain = _processChainOfLetters(parts[0])
     let r = _findRightmost(topChain)
     r.properties['modifier'] = parts[1]
     return topChain
@@ -272,7 +287,6 @@ ARGS -> AS                                                             {% (d) =>
       | ARGS _ %Comma _ AS                                             {% (d) => d[0].concat(d[4]) %}
 
 E -> P _ %Pow _ E                                                      {% processExponent %}
-   | NUM VAR                                                           {% processMultiplication %}
    | P                                                                 {% id %}
 
 # Multiplication and division
