@@ -25,6 +25,8 @@ Some of the expressions that this can parse right now are
 - `e^(i*omega + phi)`
 - `e^ish -> (e^i)*s*h`
 - `e^-ish -> (e^(-i))*s*h`
+- `Delta x -> ∆*x`
+- `Deltax -> ∆x`, not `∆*x`
 - `diff(x^2, x)`
 - `diff(x^3 * y^2, x, x, y)`
 - `diff(x^3 * y^2, x, 2, y)` (equivalent to the one above)
