@@ -16,6 +16,9 @@ Some of the expressions that this can parse right now are
 - `alpha_t0`
 - `sin(x)`
 - `sin(x)^2`
+- `log(x, 10)`
+- `ln(x)`
+- `log(x, e)`
 - `e^(i*omega + phi)`
 - `diff(x^2, x)`
 - `diff(x^3 * y^2, x, x, y)`
