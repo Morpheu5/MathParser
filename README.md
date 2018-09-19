@@ -27,7 +27,7 @@ Other features:
 - [x] radicals
 - [x] (in)equalities
 - [x] derivatives
+- [x] absolute values
 - [ ] differentials, maybe?
-- [ ] absolute values, maybe?
 
 For now, enjoy 🙂
