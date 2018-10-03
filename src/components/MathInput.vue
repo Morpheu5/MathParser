@@ -22,7 +22,7 @@ const compiledGrammar = Grammar.fromCompiled(grammar)
 export default {
     data() {
         return {
-            mathInput: 'acos(x)',
+            mathInput: '',
             parser: {},
             output: ''
         }
