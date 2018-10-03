@@ -12,7 +12,7 @@ const lexer = moo.compile({
              'cosh', 'sinh', 'tanh', 'cosech', 'sech', 'coth',
              'arccosh', 'arcsinh', 'arctanh', 'arccosech', 'arcsech', 'arccoth',
             ],
-    Fn: ['ln'],
+    Fn: ['ln', 'abs'],
     Log: ['log'],
     Radix: ['sqrt'],
     Derivative: ['diff', 'Derivative'],
@@ -61,7 +61,7 @@ const _safeToRemove = (node) => {
 const _simplify = (node) => {
     node.children = _.mapValues(node.children, (v, k, c) => _simplify(v))
 
-    if (node.type === 'Brackets') {
+    if (node.type === 'Brackets' || node.type === 'Fn') {
         let argument = node.children.argument
         if (_safeToRemove(argument)) {
             node.children.argument = argument.children.argument
@@ -76,6 +76,10 @@ const _simplify = (node) => {
         if (_safeToRemove(denominator)) {
             node.children.denominator = denominator.children.argument
         }
+    }
+    let superscript = node.children.superscript
+    if (_safeToRemove(superscript)) {
+        node.children.superscript = superscript.children.argument
     }
     return node
 }
@@ -94,6 +98,7 @@ const processRelation = (d) => {
     let relation = { type: 'Relation', properties: { relation: relText }, children: { right: rhs } }
     let r = _findRightmost(lhs)
     r.children['right'] = relation
+    lhs = _simplify(lhs)
     return { ...lhs, position: { x: _window.innerWidth/4, y: _window.innerHeight/3 }, expression: { latex: "", python: "" } }
 }
 
@@ -104,7 +109,12 @@ const processBrackets = (d) => {
 
 const processFunction = (d) => {
     let arg = _.cloneDeep(d[3])
-    return { type: 'Fn', properties: { name: d[0].text, allowSubscript: d[0].text !== 'ln', innerSuperscript: false }, children: { argument: arg } }
+    // FIXME Split this into two functions and separate parsing rules.
+    if (d[0].text === 'abs') {	
+        return { type: 'AbsoluteValue', children: { argument: arg } }	
+    } else {	
+        return { type: 'Fn', properties: { name: d[0].text, allowSubscript: d[0].text !== 'ln', innerSuperscript: false }, children: { argument: arg } }	
+    }
 }
 
 const processSpecialTrigFunction = (d_name, d_arg, d_exp = null) => {
@@ -120,11 +130,12 @@ const processSpecialTrigFunction = (d_name, d_arg, d_exp = null) => {
 const processLog = (arg, base = null) => {
     let log = { type: 'Fn', properties: { name: 'log', allowSubscript: true, innerSuperscript: false }, children: { argument: arg } }
     if (null !== base) {
-        if (base.type === 'Num' && base.properties.significand !== '10') {
-            log.children['subscript'] = _.cloneDeep(base)
-        } else if (base.type === 'Symbol') {
+        if (base.type === 'Num' || base.type === 'Symbol') {
             log.children['subscript'] = _.cloneDeep(base)
         }
+    } else {
+        // Treat log(x) as base 10 and make this very clear to the user.
+        log.children['subscript'] = { type: 'Num', properties: { significand: '10' }, children: {} }
     }
     return log
 }
