@@ -27,9 +27,16 @@ Some of the expressions that this can parse right now are
 - `e^-ish -> (e^(-i))*s*h`
 - `Delta x -> ∆*x`
 - `Deltax -> ∆x`, not `∆*x`
+- `delta x -> δ*x`
+- `deltax -> δx`, not `δ*x`
+- `d t -> d*t`
+- `dt -> dt` (differential)
+- `dabc -> d*a*b*c`
 - `diff(x^2, x)`
 - `diff(x^3 * y^2, x, x, y)`
 - `diff(x^3 * y^2, x, 2, y)` (equivalent to the one above)
+
+Differentials only differentiate one letter -- no brackets supported (yet?)
 
 Other features:
 
@@ -38,6 +45,6 @@ Other features:
 - [x] (in)equalities
 - [x] derivatives
 - [x] absolute values
-- [ ] differentials, maybe?
+- [x] differentials, maybe?
 
 For now, enjoy 🙂
