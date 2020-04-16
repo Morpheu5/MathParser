@@ -15,7 +15,7 @@ module.exports = {
     c.resolveLoader = {
       modules: ['node_modules', path.resolve(__dirname, 'src/loaders')]
     }
+    c.devtool = 'eval-source-map'
     return c
-  },
-  baseUrl: process.env.NODE_ENV === 'production' ? '/MathParser' : undefined
+  }
 }

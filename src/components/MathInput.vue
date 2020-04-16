@@ -11,17 +11,13 @@
 </template>
 
 <script>
-// eslint-disable-next-line
-import _ from 'lodash';
 
-import { Parser, Grammar } from 'nearley';
-import grammar from '../assets/grammar.ne';
-
-const compiledGrammar = Grammar.fromCompiled(grammar)
+import { parseExpression } from 'inequality-grammar';
 
 export default {
     data() {
         return {
+            // mathInput: 'Derivative(y,x,x)',
             mathInput: '',
             parser: {},
             output: ''
@@ -29,9 +25,8 @@ export default {
     },
     methods: {
         doTheThing() {
-            let parser = new Parser(compiledGrammar)
             try {
-                this.output = _.uniqWith(parser.feed(this.mathInput).results, _.isEqual)
+                this.output = parseExpression(this.mathInput);
             } catch (error) {
                 this.output = `Some error occurred: ${error}`
             }
