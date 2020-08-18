@@ -35,17 +35,3 @@ export default {
     }
 }
 </script>
-
-<style lang="scss" scoped>
-input {
-    width: 97%;
-    margin: 0;
-    line-height: 1em;
-    font-size: 2em;
-    padding: 0.5em;
-}
-
-pre {
-    font-size: 1.2em;
-}
-</style>

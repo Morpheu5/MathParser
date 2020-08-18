@@ -15,8 +15,7 @@ import { parseBooleanExpression } from 'inequality-grammar';
 export default {
     data() {
         return {
-            // mathInput: 'Derivative(y,x,x)',
-            boolInput: 'A AND (B OR NOT C)',
+            boolInput: '!(A ^ B) & (B | !C)',
             parser: {},
             output: ''
         }
@@ -35,17 +34,3 @@ export default {
     }
 }
 </script>
-
-<style lang="scss" scoped>
-input {
-    width: 97%;
-    margin: 0;
-    line-height: 1em;
-    font-size: 2em;
-    padding: 0.5em;
-}
-
-pre {
-    font-size: 1.2em;
-}
-</style>

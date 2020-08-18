@@ -34,23 +34,39 @@ export default {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   color: black;
-  width: 60px auto 0 auto;
+  margin: 60px auto 0 auto;
+  width: 1280px;
+  @media screen and (max-width: 1280px) {
+    width: 100%;
+    margin-left: 2em;
+    margin-right: 2em;
+  }
 
-  & .grid {
+  .grid {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
-    grid-gap: 2em;
-    grid-auto-rows: mixmax(100px, auto);
+    grid-column-gap: 2em;
 
-    & .col {
-      & .maths {
-        grid-column: 1 / 2;
-        grid-row: 1;
+    .col {
+      width: 1fr;
+      
+      input {
+        margin: 0;
+        line-height: 1em;
+        font-size: 2em;
+        padding: 0.5em;
       }
 
-      & .logic {
-        grid-column: 2 / 2;
-        grid-row: 1;
+      pre {
+        font-size: 1.2em;
+      }
+
+      .maths {
+        grid-column: 1;
+      }
+
+      .logic {
+        grid-column: 2;
       }
     }
   }
