@@ -1,8 +1,8 @@
 <template>
-    <div id="maths-parser">
-        <input v-model="mathInput" @keyup="doTheThing" placeholder="Your math goes here" name="mathstring" />
+    <div id="bool-parser">
+        <input v-model="boolInput" @keyup="doTheThing" placeholder="Your logic goes here" name="boolstring" />
 
-        <pre><strong>Input</strong>:<br/>       {{mathInput}}</pre>
+        <pre><strong>Input</strong>:<br/>       {{boolInput}}</pre>
         <pre>---<br/>{{ parser.lexer }}</pre>
         <pre><strong>Output size</strong>: {{output.length}}<br/>{{ output }}</pre>
     </div>
@@ -10,13 +10,13 @@
 
 <script>
 
-import { parseMathsExpression } from 'inequality-grammar';
+import { parseBooleanExpression } from 'inequality-grammar';
 
 export default {
     data() {
         return {
             // mathInput: 'Derivative(y,x,x)',
-            mathInput: 'a+sin(x)',
+            boolInput: 'A AND (B OR NOT C)',
             parser: {},
             output: ''
         }
@@ -24,7 +24,7 @@ export default {
     methods: {
         doTheThing() {
             try {
-                this.output = parseMathsExpression(this.mathInput);
+                this.output = parseBooleanExpression(this.boolInput);
             } catch (error) {
                 this.output = `Some error occurred: ${error}`
             }
