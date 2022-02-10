@@ -12,7 +12,7 @@
     "vue": "^2.6.11"
   },
   "devDependencies": {
-    "node-sass": "^4.14.1",
+    "node-sass": "^7.0.0",
     "sass-loader": "^9.0.3",
     "@vue/cli-plugin-babel": "^4.5.4",
     "@vue/cli-service": "^4.5.4",
